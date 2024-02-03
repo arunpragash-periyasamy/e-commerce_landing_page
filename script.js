@@ -29,7 +29,7 @@ const capitalizeFirstLetter = (str) => str.charAt(0).toUpperCase() + str.slice(1
 const getBackgroundColor = () => backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
 const updateSection = (categories) => categories.forEach((category) => createSection(getBackgroundColor(), category));
 const maxLength = 10;
-const truncateTitle = (title, maxLength = 30) => { return (title.length > maxLength) ? title.substring(0, maxLength) + '...' : title};
+const truncateTitle = (title, maxLength = 30) => { return (title.length > maxLength) ? title.substring(0, maxLength) + '...' : title };
 
 // dynamically update the page content
 
@@ -53,21 +53,21 @@ const productSection = document.querySelector("#productSection");
 
 
 
-const createSection = (bgColor, category) => {
+const createSection = (bgColor, category, categoryName=null) => {
   const sectionContent = `<section style="background-color: ${bgColor};">
   <div class="text-center container py-5">
-    <h4 class="mt-4 mb-5"><strong>${capitalizeFirstLetter(category)}</strong></h4>
+    <h4 class="mt-4 mb-5"><strong>${(categoryName === null) ? capitalizeFirstLetter(category) : "Similar Products"}</strong></h4>
 
 
     <div class="row product" id="${category}">
     </div>
     </div>
     </section>`;
-    productSection.insertAdjacentHTML('beforeend', sectionContent);
+  productSection.insertAdjacentHTML('beforeend', sectionContent);
 }
 
-const createProduct = (product, category)=>{
-  const productElement = `<div class="col-md-4 mb-5">
+const createProduct = (product, category) => {
+  const productElement = `<div class="col-md-4 mb-5"><a href="https://fakestoreapi.com/products/${product.id}" style="text-decoration: none;">
   <div class="card">
     <div class="ccc">
       <p class="text-center"><img src="${product.image}"
@@ -78,12 +78,37 @@ const createProduct = (product, category)=>{
       <p class="text-center">Price: $${product.price}</p>
       <p class="text-center"><input type="button" name="Save" value="Buy" class=" cc1"></p>
     </div>
-  </div>
+  </div></a>
   </div>`;
-  console.log(category);
+  console.log(product);
   const categoryElement = document.getElementById(category);
-  categoryElement.insertAdjacentHTML('beforeend',productElement);
+  categoryElement.insertAdjacentHTML('beforeend', productElement);
 }
+
+
+const createProductDetail = (product) => {
+  const productContent = `<div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="${product.image}" alt="..." /></div>
+  <div class="col-md-6">
+      <div class="small mb-1">SKU: BST-498</div>
+      <h1 class="display-5 fw-bolder">${capitalizeFirstLetter(product.title)}</h1>
+      <div class="fs-5 mb-5">
+          <span>$${product.price}</span>
+      </div>
+      <p class="lead">${product.description}</p>
+      <div class="d-flex">
+          <input class="form-control text-center me-3" id="inputQuantity" type="num" value="1" style="max-width: 3rem" />
+          <button class="btn btn-outline-dark flex-shrink-0" type="button">
+              <i class="bi-cart-fill me-1"></i>
+              Add to cart
+          </button>
+      </div>
+  </div>`;
+
+  const productDetail = document.getElementById('productDetail');
+  productDetail.insertAdjacentHTML('beforeend', productContent);
+
+}
+
 
 const updateProducts = async (category) => {
   const response = await fetch(Category_API + category);
@@ -96,7 +121,7 @@ const updateProducts = async (category) => {
 
 
 
-const updatePage = () =>{
+const updatePage = () => {
   const randomColor = Math.floor(Math.random() * backgroundColors.length);
   const randomCategory = Math.floor(Math.random() * category.length);
   createSection(backgroundColors[randomColor], category[randomCategory]);
@@ -143,14 +168,33 @@ const getData = async (API) => {
 
 //   console.log(category);
 // }
+
+
+// page wise function
+
+// home page
 let categories;
-const page = async () => {
+const homePage = async () => {
   categories = await getData(Categories_API);
-  updateSection(categories);
-  categories.forEach((category) => updateProducts(category.toLowerCase()));
+  // updateSection(categories);
+  
+  categories.forEach((category) => {
+    createSection(getBackgroundColor(), category);
+    updateProducts(category);
+  });
 }
 
 
-page();
 
+// product page
 
+const productPage = async () => {
+  // Get the search parameters from the URL
+  const urlParam = new URLSearchParams(window.location.search);
+  const id = urlParam.get('id');
+  const data = await getData(Products_API+`/${id}`);
+  const category = data.category;
+  createProductDetail(data);
+  createSection(getBackgroundColor(), category, "categoryz");
+  updateProducts(category);
+}
