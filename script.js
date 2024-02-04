@@ -67,7 +67,7 @@ const createSection = (bgColor, category, categoryName=null) => {
 }
 
 const createProduct = (product, category) => {
-  const productElement = `<div class="col-md-4 mb-5"><a href="https://fakestoreapi.com/products/${product.id}" style="text-decoration: none;">
+  const productElement = `<div class="col-md-4 mb-5"><a href="./product.html?id=${product.id}" style="text-decoration: none;">
   <div class="card">
     <div class="ccc">
       <p class="text-center"><img src="${product.image}"
