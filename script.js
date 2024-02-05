@@ -53,7 +53,7 @@ const productSection = document.querySelector("#productSection");
 
 
 
-const createSection = (bgColor, category, categoryName=null) => {
+const createSection = (bgColor, category, categoryName = null) => {
   const sectionContent = `<section style="background-color: ${bgColor};">
   <div class="text-center container py-5">
     <h4 class="mt-4 mb-5"><strong>${(categoryName === null) ? capitalizeFirstLetter(category) : "Similar Products"}</strong></h4>
@@ -95,25 +95,27 @@ const createProductDetail = (product) => {
       </div>
       <p class="lead">${product.description}</p>
       <div class="d-flex">
-      <div class="me-3">
-      <button class="btn btn-outline-dark flex-shrink-0" id="incrementBtn" type="button">Increment</button>
-          <input class="form-control text-center " id="inputQuantity" type="num" value="1" style="max-width: 3rem" />
-          <button class="btn btn-outline-dark flex-shrink-0" id="decrementBtn" type="button">Decrement</button>
+      <div class=" d-flex me-3">
+      <button class="btn btn-outline-dark flex-shrink-0" id="incrementBtn" type="button">+</button>
+          <input class="form-control text-center " id="quantity" type="num" value="1" style="max-width: 3rem" />
+          <button class="btn btn-outline-dark flex-shrink-0" id="decrementBtn" type="button">-</button>
           </div>
-          <button class="btn btn-outline-dark flex-shrink-0" type="button">
+          <button class="btn btn-outline-dark flex-shrink-0" id="addToCart" type="button">
               <i class="bi-cart-fill me-1"></i>
               Add to cart
           </button>
       </div>
   </div>`;
 
+  createSection(getBackgroundColor(), product.category, "Similar Products");
+  updateProducts(product.category, product.id);
   const productDetail = document.getElementById('productDetail');
   productDetail.insertAdjacentHTML('beforeend', productContent);
 
 }
 
 
-const updateProducts = async (category, id=0) => {
+const updateProducts = async (category, id = 0) => {
   const response = await fetch(Category_API + category);
   const data = await response.json();
   data.forEach((product) => {
@@ -180,7 +182,7 @@ let categories;
 const homePage = async () => {
   categories = await getData(Categories_API);
   // updateSection(categories);
-  
+
   categories.forEach((category) => {
     createSection(getBackgroundColor(), category);
     updateProducts(category);
@@ -195,14 +197,41 @@ const productPage = async () => {
   // Get the search parameters from the URL
   const urlParam = new URLSearchParams(window.location.search);
   const id = urlParam.get('id');
-  const data = await getData(Products_API+`/${id}`);
-  const category = data.category;
+  const data = await getData(Products_API + `/${id}`);
   createProductDetail(data);
-  createSection(getBackgroundColor(), category, "Similar Products");
-  updateProducts(category, id);
-  handleCart();
+
+  handleCart(id);
 }
 
-const handleCart = async () => {
+const handleCart = async (id) => {
+  const quantity = document.getElementById('quantity');
+  const cartItems = await JSON.parse(localStorage.getItem('cartItems'));
+  const addToCart = document.getElementById('addToCart');
+  const incrementBtn = document.getElementById('incrementBtn');
+  const decrementBtn = document.getElementById('decrementBtn');
+  const addEventToCartButton = ()=>{
+    addToCart.innerText = 'Go to Cart';
+    addToCart.addEventListener('click', () => window.location.href = './cart.html');
+  }
+  if (cartItems.hasOwnProperty(id)) {
+    quantity.value = cartItems[id];
+    addEventToCartButton();
+  }
+  const updateQuantity = (increment) => () => {
+    const value = parseInt(quantity.value) + increment;
+    const pattern = /^[1-9]\d*$/;
+    quantity.value = pattern.test(value) ? value : 1;
+  }
 
+  const addToCartHandler = async () => {
+    let cart = JSON.parse(localStorage.getItem('cartItems'));
+    cart[id] = quantity.value;
+    localStorage.setItem('cartItems', JSON.stringify(cart));
+    addEventToCartButton();
+  }
+
+  incrementBtn.addEventListener('click', updateQuantity(1));
+  decrementBtn.addEventListener('click', updateQuantity(-1));
+  quantity.addEventListener('change', updateQuantity(0));
+  addToCart.addEventListener('click', addToCartHandler);
 }
