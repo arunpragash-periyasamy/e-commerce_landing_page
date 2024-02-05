@@ -114,10 +114,40 @@ const createProductDetail = (product) => {
 
 }
 
+const updateProductGrid = (product, quantity) => {
+  const productItems = document.getElementById('productItems');
+  const productCard = `<div class="card mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <div class="d-flex flex-row align-items-center">
+        <div>
+          <img
+            src="${product.image}"
+            class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
+        </div>
+        <div class="ms-3">
+          <h5>${product.title}</h5>
+        </div>
+      </div>
+      <div class="d-flex flex-row align-items-center">
+        <div style="width: 50px;">
+          <h5 class="fw-normal mb-0">${quantity}</h5>
+        </div>
+        <div style="width: 80px;">
+          <h5 class="mb-0">$${product.price*quantity}</h5>
+        </div>
+        <a href="#!" style="color: #cecece;"><i class="fas fa-trash-alt"></i></a>
+      </div>
+    </div>
+  </div>
+  </div>`;
+  productItems.insertAdjacentHTML('beforeend',productCard);
+}
+
+
 
 const updateProducts = async (category, id = 0) => {
-  const response = await fetch(Category_API + category);
-  const data = await response.json();
+  const data = await getData(Category_API + category);
   data.forEach((product) => {
     (id != product.id) && createProduct(product, category);
   });
@@ -139,6 +169,7 @@ const updatePage = () => {
 const Products_API = 'https://fakestoreapi.com/products';
 const Categories_API = 'https://fakestoreapi.com/products/categories';
 const Category_API = 'https://fakestoreapi.com/products/category/';
+const User_API = 'https://fakestoreapi.com/carts?userId=1';
 
 
 // const getProducts = async () => {
@@ -177,6 +208,12 @@ const getData = async (API) => {
 
 // page wise function
 
+
+// commmon variables
+
+const urlParam = new URLSearchParams(window.location.search);
+
+
 // home page
 let categories;
 const homePage = async () => {
@@ -189,31 +226,81 @@ const homePage = async () => {
   });
 }
 
-
+const activeNavbar = async (category) => {
+  const element = document.getElementById(`${category}`);
+  element.classList.add('active');
+}
 
 // product page
 
 const productPage = async () => {
   // Get the search parameters from the URL
-  const urlParam = new URLSearchParams(window.location.search);
   const id = urlParam.get('id');
   const data = await getData(Products_API + `/${id}`);
   createProductDetail(data);
+  activeNavbar(data.category+'_nav_item');
 
+  let productDetails = await JSON.parse(localStorage.getItem('productDetails'));
+  productDetails = (productDetails === null) ? {} : productDetails;
+  if(!productDetails.hasOwnProperty(id)) productDetails[id] = data;
+  localStorage.setItem('productDetails', JSON.stringify(productDetails));
   handleCart(id);
+}
+
+// category page
+const categoryPage = async () => {
+  const category = urlParam.get('category');
+  console.log(Category_API+ encodeURIComponent(category));
+  const data = await getData(Category_API + encodeURIComponent(category));
+  updateProducts(category);
+  console.log(category);
+  createSection(getBackgroundColor(), category);
+  activeNavbar(category+'_nav_item');
+}
+
+
+// cart page
+
+
+const getCartDetails = async () => {
+  const data = JSON.parse(localStorage.getItem('cartItems'));
+  return (data === null) ? {} : data;
+}
+
+const cartPage = async () => {
+  const data = await getCartDetails();
+  const itemCount = Object.keys(data).length;
+  let total = 0;
+  Object.entries(data).forEach(([key, value]) => {
+    const product = JSON.parse(localStorage.getItem('productDetails'))[key];
+    updateProductGrid(product, value);
+    total += product.price * value;
+  });
+  document.getElementById('total').innerText = `$${total}`;
+  document.getElementById('subTotal').innerText = `$${total}`;
+  document.getElementById('checkOutPrice').innerText = `$${total}`;
+  document.getElementById('noOfItems').innerText=`You have ${itemCount} items in your cart`;
 }
 
 const handleCart = async (id) => {
   const quantity = document.getElementById('quantity');
-  const cartItems = await JSON.parse(localStorage.getItem('cartItems'));
+  const cartItems = await getCartDetails();
   const addToCart = document.getElementById('addToCart');
   const incrementBtn = document.getElementById('incrementBtn');
   const decrementBtn = document.getElementById('decrementBtn');
+
+  const redirectURL = () => {
+    window.location.href = './cart.html';
+  }
   const addEventToCartButton = ()=>{
     addToCart.innerText = 'Go to Cart';
-    addToCart.addEventListener('click', () => window.location.href = './cart.html');
+    addToCart.addEventListener('click', redirectURL);
   }
-  if (cartItems.hasOwnProperty(id)) {
+  const removeEventToCartButton = ()=>{
+    addToCart.innerText = 'Add to Cart';
+    addToCart.removeEventListener('click', redirectURL);
+  }
+  if (cartItems !== null && cartItems.hasOwnProperty(id)) {
     quantity.value = cartItems[id];
     addEventToCartButton();
   }
@@ -221,12 +308,12 @@ const handleCart = async (id) => {
     const value = parseInt(quantity.value) + increment;
     const pattern = /^[1-9]\d*$/;
     quantity.value = pattern.test(value) ? value : 1;
+    removeEventToCartButton();
   }
-
+// handling the product details
   const addToCartHandler = async () => {
-    let cart = JSON.parse(localStorage.getItem('cartItems'));
-    cart[id] = quantity.value;
-    localStorage.setItem('cartItems', JSON.stringify(cart));
+    cartItems[id] = quantity.value;
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
     addEventToCartButton();
   }
 
@@ -235,3 +322,4 @@ const handleCart = async (id) => {
   quantity.addEventListener('change', updateQuantity(0));
   addToCart.addEventListener('click', addToCartHandler);
 }
+
