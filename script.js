@@ -80,7 +80,6 @@ const createProduct = (product, category) => {
     </div>
   </div></a>
   </div>`;
-  console.log(product);
   const categoryElement = document.getElementById(category);
   categoryElement.insertAdjacentHTML('beforeend', productElement);
 }
@@ -96,7 +95,11 @@ const createProductDetail = (product) => {
       </div>
       <p class="lead">${product.description}</p>
       <div class="d-flex">
-          <input class="form-control text-center me-3" id="inputQuantity" type="num" value="1" style="max-width: 3rem" />
+      <div class="me-3">
+      <button class="btn btn-outline-dark flex-shrink-0" id="incrementBtn" type="button">Increment</button>
+          <input class="form-control text-center " id="inputQuantity" type="num" value="1" style="max-width: 3rem" />
+          <button class="btn btn-outline-dark flex-shrink-0" id="decrementBtn" type="button">Decrement</button>
+          </div>
           <button class="btn btn-outline-dark flex-shrink-0" type="button">
               <i class="bi-cart-fill me-1"></i>
               Add to cart
@@ -110,11 +113,11 @@ const createProductDetail = (product) => {
 }
 
 
-const updateProducts = async (category) => {
+const updateProducts = async (category, id=0) => {
   const response = await fetch(Category_API + category);
   const data = await response.json();
   data.forEach((product) => {
-    createProduct(product, category);
+    (id != product.id) && createProduct(product, category);
   });
 }
 
@@ -195,6 +198,11 @@ const productPage = async () => {
   const data = await getData(Products_API+`/${id}`);
   const category = data.category;
   createProductDetail(data);
-  createSection(getBackgroundColor(), category, "categoryz");
-  updateProducts(category);
+  createSection(getBackgroundColor(), category, "Similar Products");
+  updateProducts(category, id);
+  handleCart();
+}
+
+const handleCart = async () => {
+
 }
