@@ -398,7 +398,7 @@ const loginFormHandling = async (emailElement, passwordElement) => {
   const emailId = emailElement.value;
   const password = passwordElement.value;
   const data = await getLocalStorage('user');
-  if(data.hasOwnProperty(emailId)){
+  if(data !== null && data.hasOwnProperty(emailId)){
     if(data[emailId] === password){
       window.location.href = './cart.html?page=login';
     }else{
