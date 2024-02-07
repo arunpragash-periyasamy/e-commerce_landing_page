@@ -25,7 +25,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto ml-auto">
-          <li class="nav-item active">
+          <li class="nav-item">
             <a class="nav-link" href="#home"><i class="fa fa-home"></i> Home</a>
           </li>
           <li class="nav-item"  id="electronics_nav_item">
@@ -43,12 +43,12 @@
         </ul>
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#login"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+            <a class="nav-link" href="./signIn.html?page=login"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#signup"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
+            <a class="nav-link" href="./signIn.html?page=signin"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item active">
             <a class="nav-link" href="./cart.html"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
           </li>
         </ul>
@@ -104,30 +104,30 @@
       
                           <form class="mt-4">
                             <div class="form-outline form-white mb-4">
-                              <input type="text" id="typeName" class="form-control form-control-lg" siez="17"
-                                placeholder="Cardholder's Name" />
+                              <input type="text" id="cardHolderName" class="form-control form-control-lg" siez="17"
+                                placeholder="Cardholder's Name" required/>
                               <label class="form-label" for="typeName">Cardholder's Name</label>
                             </div>
       
                             <div class="form-outline form-white mb-4">
-                              <input type="text"  class="form-control form-control-lg" siez="17"
-                                placeholder="1234 5678 9012 3457" minlength="19" maxlength="19" />
-                              <label class="form-label" for="typeText">Card Number</label>
+                              <input type="text" id="cardNumber"  class="form-control form-control-lg" siez="17"
+                                placeholder="1234 5678 9012 3457" minlength="19" maxlength="19"  required/>
+                              <label class="form-label" >Card Number</label>
                             </div>
       
                             <div class="row mb-4">
                               <div class="col-md-6">
                                 <div class="form-outline form-white">
-                                  <input type="text" id="typeExp" class="form-control form-control-lg"
-                                    placeholder="MM/YYYY" size="7" id="exp" minlength="7" maxlength="7" />
+                                  <input type="text" id="expiration" class="form-control form-control-lg"
+                                    placeholder="MM/YYYY" size="7" id="exp" minlength="7" maxlength="7"  required/>
                                   <label class="form-label" for="typeExp">Expiration</label>
                                 </div>
                               </div>
                               <div class="col-md-6">
                                 <div class="form-outline form-white">
-                                  <input type="password"  class="form-control form-control-lg"
-                                    placeholder="&#9679;&#9679;&#9679;" size="1" minlength="3" maxlength="3" />
-                                  <label class="form-label" for="typeText">Cvv</label>
+                                  <input type="password" id="cvv"  class="form-control form-control-lg"
+                                    placeholder="&#9679;&#9679;&#9679;" size="1" minlength="3" maxlength="3"  required/>
+                                  <label class="form-label" >Cvv</label>
                                 </div>
                               </div>
                             </div>
@@ -138,22 +138,22 @@
       
                           <div class="d-flex justify-content-between">
                             <p class="mb-2">Subtotal</p>
-                            <p class="mb-2" id="subTotal">$4798.00</p>
+                            <p class="mb-2" id="subTotal">$0.00</p>
                           </div>
       
                           <div class="d-flex justify-content-between">
                             <p class="mb-2">Shipping</p>
-                            <p class="mb-2"><s>$20.00</s><span style="color: yellow; font-weight: 900;">Free</span></p>
+                            <p class="mb-2"><s>$0.00</s><span style="color: yellow; font-weight: 900;">Free</span></p>
                           </div>
       
                           <div class="d-flex justify-content-between mb-4">
                             <p class="mb-2">Total(Incl. taxes)</p>
-                            <p class="mb-2" id="total">$4818.00</p>
+                            <p class="mb-2" id="total">$0.00</p>
                           </div>
       
-                          <button type="button" class="btn btn-info btn-block btn-lg">
+                          <button type="submit" class="btn btn-info btn-block btn-lg" onclick='paymentSuccess()'>
                             <div class="d-flex justify-content-between">
-                              <span id="checkOutPrice">$4818.00</span>
+                              <span id="checkOutPrice">$0.00</span>
                               <span>Checkout <i class="fas fa-long-arrow-alt-right ms-2"></i></span>
                             </div>
                           </button>

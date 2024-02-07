@@ -1,28 +1,28 @@
+try {
+  // navbar active state change
+  const navbarMenu = document.querySelector(".navbar-toggler");
+  const toggleMenu = () => {
+    var navbarCollapse = document.querySelector(".navbar-collapse");
+    navbarCollapse.style.transition = 'slideToggle 300ms';
+    navbarCollapse.style.display = (navbarCollapse.style.display === 'none' || navbarCollapse.style.display === '') ? 'block' : 'none';
+  }
+  navbarMenu.addEventListener("click", toggleMenu);
 
-// navbar active state change
-const navbarMenu = document.querySelector(".navbar-toggler");
-const toggleMenu = () => {
-  var navbarCollapse = document.querySelector(".navbar-collapse");
-  navbarCollapse.style.transition = 'slideToggle 300ms';
-  navbarCollapse.style.display = (navbarCollapse.style.display === 'none' || navbarCollapse.style.display === '') ? 'block' : 'none';
-}
-navbarMenu.addEventListener("click", toggleMenu);
+  const navItems = document.querySelectorAll('.navbar-nav .nav-item');
 
-const navItems = document.querySelectorAll('.navbar-nav .nav-item');
-
-const removeActiveClass = () => {
-  navItems.forEach((navItem) => {
-    navItem.classList.remove('active');
+  const removeActiveClass = () => {
+    navItems.forEach((navItem) => {
+      navItem.classList.remove('active');
+    });
+  }
+  navItems.forEach((item) => {
+    item.addEventListener('click', function () {
+      removeActiveClass();
+      item.classList.add('active');
+    });
   });
-}
-navItems.forEach((item) => {
-  item.addEventListener('click', function () {
-    removeActiveClass();
-    item.classList.add('active');
-  });
-});
 
-
+} catch (e) { }
 
 // helper functions
 const capitalizeFirstLetter = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -126,7 +126,7 @@ const updateProductGrid = (product, quantity) => {
             class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
         </div>
         <div class="ms-3">
-          <h5>${product.title}</h5>
+          <h5>${truncateTitle(product.title)}</h5>
         </div>
       </div>
       <div class="d-flex flex-row align-items-center">
@@ -134,14 +134,14 @@ const updateProductGrid = (product, quantity) => {
           <h5 class="fw-normal mb-0">${quantity}</h5>
         </div>
         <div style="width: 80px;">
-          <h5 class="mb-0">$${product.price*quantity}</h5>
+          <h5 class="mb-0">$${(product.price * quantity).toFixed(2)}</h5>
         </div>
-        <a href="#!" style="color: #cecece;"><i class="fas fa-trash-alt"></i></a>
+        <a href="#" style="color: #cecece;" onclick=deleteItem(${product.id})><i class="fas fa-trash-alt"></i></a>
       </div>
     </div>
   </div>
   </div>`;
-  productItems.insertAdjacentHTML('beforeend',productCard);
+  productItems.insertAdjacentHTML('beforeend', productCard);
 }
 
 
@@ -238,11 +238,11 @@ const productPage = async () => {
   const id = urlParam.get('id');
   const data = await getData(Products_API + `/${id}`);
   createProductDetail(data);
-  activeNavbar(data.category+'_nav_item');
+  activeNavbar(data.category + '_nav_item');
 
   let productDetails = await JSON.parse(localStorage.getItem('productDetails'));
   productDetails = (productDetails === null) ? {} : productDetails;
-  if(!productDetails.hasOwnProperty(id)) productDetails[id] = data;
+  if (!productDetails.hasOwnProperty(id)) productDetails[id] = data;
   localStorage.setItem('productDetails', JSON.stringify(productDetails));
   handleCart(id);
 }
@@ -250,12 +250,12 @@ const productPage = async () => {
 // category page
 const categoryPage = async () => {
   const category = urlParam.get('category');
-  console.log(Category_API+ encodeURIComponent(category));
+  console.log(Category_API + encodeURIComponent(category));
   const data = await getData(Category_API + encodeURIComponent(category));
   updateProducts(category);
   console.log(category);
   createSection(getBackgroundColor(), category);
-  activeNavbar(category+'_nav_item');
+  activeNavbar(category + '_nav_item');
 }
 
 
@@ -279,7 +279,7 @@ const cartPage = async () => {
   document.getElementById('total').innerText = `$${total}`;
   document.getElementById('subTotal').innerText = `$${total}`;
   document.getElementById('checkOutPrice').innerText = `$${total}`;
-  document.getElementById('noOfItems').innerText=`You have ${itemCount} items in your cart`;
+  document.getElementById('noOfItems').innerText = `You have ${itemCount} items in your cart`;
 }
 
 const handleCart = async (id) => {
@@ -292,11 +292,11 @@ const handleCart = async (id) => {
   const redirectURL = () => {
     window.location.href = './cart.html';
   }
-  const addEventToCartButton = ()=>{
+  const addEventToCartButton = () => {
     addToCart.innerText = 'Go to Cart';
     addToCart.addEventListener('click', redirectURL);
   }
-  const removeEventToCartButton = ()=>{
+  const removeEventToCartButton = () => {
     addToCart.innerText = 'Add to Cart';
     addToCart.removeEventListener('click', redirectURL);
   }
@@ -310,7 +310,7 @@ const handleCart = async (id) => {
     quantity.value = pattern.test(value) ? value : 1;
     removeEventToCartButton();
   }
-// handling the product details
+  // handling the product details
   const addToCartHandler = async () => {
     cartItems[id] = quantity.value;
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -323,3 +323,153 @@ const handleCart = async (id) => {
   addToCart.addEventListener('click', addToCartHandler);
 }
 
+const deleteItem = (item) => {
+  const cartItems = JSON.parse(localStorage.getItem('cartItems'));
+  delete cartItems[item];
+  localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  window.location.reload();
+}
+
+const validField = (field) => {
+  return field.value !== '';
+}
+
+const paymentSuccess = () => {
+  const cardHolderName = document.getElementById('cardHolderName');
+  const cardNumber = document.getElementById('cardNumber');
+  const expiration = document.getElementById('expiration');
+  const cvv = document.getElementById('cvv');
+  if (validField(cardHolderName) && validField(cardNumber) && validField(expiration) && validField(cvv)) {
+    window.location.href = './paymentSuccess.html';
+  } else {
+    alert('Please fill all the fields');
+  }
+}
+
+
+
+// getter and setter for localStorage
+
+
+const getLocalStorage = (key) => {
+  return JSON.parse(localStorage.getItem(key));
+}
+
+
+const setLocalStorage = (key, value) =>{
+  let data = getLocalStorage(key);
+  if (data === null) {
+    data = {[value.email]: value.password}
+    console.log(data);
+  }else if(data[value.email] !== undefined){
+    return false;
+  }else{
+    data = {...data, [value.email]: value.password}
+  }
+  localStorage.setItem(key, JSON.stringify(data));
+  return true;
+}
+
+
+
+
+// sign in and login content
+
+const changeContent = async (page) => {
+  const headingContent = document.getElementById("headingContent");
+  const accountContent = document.getElementById("accountContent");
+  const button = document.getElementById("buttonContent");
+  button.innerHTML = "Sign Up";
+  accountContent.innerHTML = `  Already have an account? <a
+  href="./signIn.html?page=login" style="color: #393f81;">Login here</a>`;
+  console.log("Page")
+  headingContent.innerHTML = "SignIn into your account";
+  const hideContent = document.querySelector("#hideContent");
+  hideContent.classList.remove("d-none");
+}
+
+const isValidEmail = async (email) => {
+  const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return regex.test(email);
+}
+
+const loginFormHandling = async (emailElement, passwordElement) => {
+  removeErrors();
+  const emailId = emailElement.value;
+  const password = passwordElement.value;
+  const data = await getLocalStorage('user');
+  if(data.hasOwnProperty(emailId)){
+    if(data[emailId] === password){
+      window.location.href = './cart.html?page=login';
+    }else{
+      const passwordError = document.getElementById('passwordError');
+      passwordError.classList.remove('d-none');
+    }
+  }else{
+    const emailError = document.getElementById('emailError');
+    emailError.classList.remove('d-none');
+  }
+}
+
+const removeErrors = () => {
+  const errorElements = document.querySelectorAll('.error');
+  errorElements.forEach(element => {
+    element.classList.add('d-none');
+  });
+}
+
+const signinFormHandling = async (email, password, 
+confirmPassword) => {
+  console.log("Button clicked");
+  removeErrors();
+  let validForm = true;
+  if (! await isValidEmail(email.value)) {
+    const emailError = document.getElementById('emailError');
+    emailError.classList.remove('d-none');
+    validForm = false;
+    return;
+  }
+  if (password.value === '') {
+    const passwordError = document.getElementById('passwordError');
+    passwordError.classList.remove('d-none');
+    validForm = false;
+    return;
+  }
+  if (password.value!== confirmPassword.value) {
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+    confirmPasswordError.classList.remove('d-none');
+    validForm = false;
+    return;
+  }
+  if (validForm) {
+const object = {email: email.value, password: password.value}
+    const result = setLocalStorage('user', object);
+    if (!result) {
+      alert("user already exists");
+      return ;
+    }
+    window.location.href = './signIn.html?page=login';
+  }
+}
+
+const logInContent = async () => {
+}
+
+const signInContent = async () => {
+  changeContent();
+}
+
+const signInPage = async () => {
+
+  const email = document.getElementById('emailId');
+  const password = document.getElementById('password');
+  const confirmPassword = document.getElementById('confirmPassword');
+  const button = document.getElementById('buttonContent');
+  const page = urlParam.get('page');
+  if (page === 'signin') {
+    signInContent();
+    button.addEventListener('click', ()=>signinFormHandling(email, password, confirmPassword));
+  } else {
+    button.addEventListener('click', ()=>loginFormHandling(email, password));
+  }
+}

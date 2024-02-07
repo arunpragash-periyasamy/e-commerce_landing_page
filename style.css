@@ -216,3 +216,7 @@ img {
     box-shadow: 5px 10px #888888;
   }
   
+
+  .error{
+    color:red;
+  }
